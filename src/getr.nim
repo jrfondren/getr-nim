@@ -104,7 +104,7 @@ proc options =
   spawnArgs = argv[i+1 .. ^1]
 
 proc main =
-  for i in 0 .. spawnCount:
+  for i in 1 .. spawnCount:
     var pid = startProcess(spawnArgs[0], args=spawnArgs[1 .. ^1], options={poParentStreams, poUsePath})
     discard waitForExit(pid)
 
