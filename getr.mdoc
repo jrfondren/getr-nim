@@ -1,0 +1,76 @@
+.Dd April 21, 2019
+.Dt GETR 1
+.Os POSIX
+.Sh NAME
+.Nm getr
+.Nd getrusage() wrapper for simple benchmarks
+.Sh SYNOPSIS
+.Pp
+\fBgetr\fR
+.Op Ar -h
+.Op Ar -b Ar ref
+.Ar count
+.Ar program
+.Op Ar args Ar ...
+.Sh OUTPUT
+.Bd -literal
+$ getr 1000 ./fizzbuzz >/dev/null
+User time      : 0 s, 894347 us
+System time    : 0 s, 673832 us
+Time           : 1568.179 ms (1.568 ms/per)
+Max RSS        : 952 kB
+Page reclaims  : 239344
+Page faults    : 1
+Block inputs   : 0
+Block outputs  : 0
+vol ctx switches   : 0
+invol ctx switches : 1298
+
+$ getr -b 1.568 1000 perl -le ''
+| 3.738x | 5.86151 ms | 1.6 MB |
+.Ed
+.Sh DESCRIPTION
+.Pp
+\fBgetr\fR is a simple wrapper around the \fBgetrusage\fR(2)
+syscall, which can be relied on for basic resource usage reports
+under Linux, OpenBSD, and macOS (among others). A child command
+is repeatedly spawned and waited for, and then a
+\fBRUSAGE_CHILDREN\fR report is generated. This program was
+created as the author was used to very simple bash loops to test
+performance, which he then found didn't work at all under ksh on
+OpenBSD. \fBgetr\fR is just as easy and just as simple.
+.Sh EXIT STATUS
+.Pp
+\fBgetr\fR exits with status 1 if any \fBwaitpid\fR(2) or
+\fBposix_spawn\fR(2) syscalls fail, or if its own arguments
+aren't understood. It exits with status 0 in all other cases,
+including if the spawned program returns a nonzero exit status.
+.Sh EXAMPLES
+.Pp
+\fBgetr 1000 ./fizzbuzz > /dev/null\fR
+.Pp
+\fBfizzbuzz\fR is invoked 1000 times, with no arguments, and with
+\fBgetr\fR's own (and therefore \fBfizzbuzz\fR's) standard output
+piped to \fB/dev/null\fR. The resulting usage report would still
+be printed to standard error.
+.Pp
+\fBgetr 100 python3 -c ''\fR
+.Pp
+The \fBpython3\fR in PATH is asked, 100 times, to evaluate
+the empty string as a Python script.
+.Pp
+\fBgetr -b 5.86 100 python3 -c ''\fR
+.Pp
+As above. Instead of the normal listing, the output is a single row
+suitable for adding to an org-mode table, with columns Speed, Runtime,
+and MaxRSS. Speed is calculated as Ref * Speed = Runtime, where Ref is
+5.86 in the above example. In the \fBOUTPUT\fR section you can see
+that Perl, asked to do nothing, takes 3.7 times as long as fizzbuzz
+takes to produce its output.
+.Sh SEE ALSO
+.Pp
+.Xr getrusage 2 ,
+.Xr which 1 ,
+.Xr time 1 ,
+.Xr perf 1 ,
+.Xr valgrind 1 .
