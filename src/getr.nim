@@ -1,3 +1,4 @@
+{.passC: "-Wno-error=incompatible-pointer-types".}  # gcc 14
 import os, osproc, strformat, strutils
 
 # system.quit writes to stdout instead of stderr

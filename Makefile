@@ -3,5 +3,5 @@ all:: getr
 clean::
 	rm -fv getr
 
-getr: getr.nim
+getr: src/getr.nim
 	nim c -d:release $<
